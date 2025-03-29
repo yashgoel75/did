@@ -19,16 +19,15 @@ export default function Home() {
     const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
     const { writeContract, isPending, isSuccess, error } = useWriteContract();
     
-    // Add refetch capability to the hook
     const { data: did, refetch: refetchDID } = useReadContract({
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'getDID',
         args: [address],
-        enabled: !!address, // Only run when address is available
+        enabled: !!address,
     });
     
-    // Add a local DID state that we can update immediately after operations
+    // Add a local DID state 
     const [localDID, setLocalDID] = useState('');
 
     useEffect(() => {
@@ -40,11 +39,9 @@ export default function Home() {
         }
     }, [did]);
 
-    // Add effect to refetch DID when writeContract is successful
     useEffect(() => {
         if (isSuccess && address) {
             console.log("Transaction successful, refetching DID...");
-            // Wait a bit for the blockchain to process before refetching
             setTimeout(() => {
                 refetchDID();
             }, 2000);
@@ -67,37 +64,16 @@ export default function Home() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ address })
             });
-          
-            // If MongoDB auth fails with a 5xx error, try blockchain fallback
-            if (res.status >= 500) {
-                console.log("MongoDB auth failed, trying blockchain fallback");
-                setMessage('Primary verification service unavailable, trying alternative...');
-              
-                res = await fetch('/api/auth/blockchain', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ address })
-                });
-            }
-          
+         
             const data = await res.json();
           
             if (!res.ok) throw new Error(data.error || 'Authentication failed');
-          
+      
             if (data.authenticated) {
-                if (data.fromBlockchain) {
-                    setMessage(`Authentication successful! Your identity (${data.did}) has been verified.`);
-                    // Update local DID immediately for better UX
+                setMessage(`Welcome back! Your identity has been verified.`);
+                if (data.did) {
                     setLocalDID(data.did);
-                    // Refetch from blockchain to ensure UI is in sync
                     refetchDID();
-                } else {
-                    setMessage(`Welcome back! Your identity has been verified.`);
-                    if (data.did) {
-                        setLocalDID(data.did);
-                        // Also refetch from blockchain
-                        refetchDID();
-                    }
                 }
             } else {
                 setMessage('Identity verification failed. Please register first.');
@@ -107,7 +83,7 @@ export default function Home() {
             console.error(err.message);
             setMessage(`Authentication Error: ${err.message}`);
         }
-    };
+};
 
     // Registration handler
     const handleSubmit = async (e) => {
@@ -134,7 +110,7 @@ export default function Home() {
             });
             if (!res.ok) throw new Error('Failed to save identity data');
 
-            // Set local DID immediately for better UX
+            // Set local DID
             setLocalDID(didString);
             
             // Register DID on blockchain
@@ -148,7 +124,6 @@ export default function Home() {
             setMessage('DID Registration Successful! You can now log in with your wallet.');
             setAuthMode('login');
             
-            // We'll refetch the DID in the useEffect when isSuccess becomes true
         } catch (err) {
             console.error(err.message);
             setMessage('Error: Registration failed. Please try again.');
@@ -161,7 +136,6 @@ export default function Home() {
         setMessage('');
     };
 
-    // Use localDID as fallback if did from contract isn't available yet
     const displayDID = did || localDID;
 
     return (
