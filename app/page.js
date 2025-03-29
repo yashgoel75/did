@@ -116,7 +116,7 @@ export default function Home() {
                     {message && <p className="mt-4">{message}</p>}
                     {error && (
                         <p className="mt-4 text-red-600">
-                            Opps! Something went wrong
+                            Oops! Something went wrong
                         </p>
                     )}
                     {isSuccess && (
