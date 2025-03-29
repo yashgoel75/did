@@ -59,7 +59,8 @@ export default function Home() {
             });
             setMessage('DID Registered Successfully!');
         } catch (err) {
-            setMessage(`Error: ${err.message}`);
+            console.error(err.message);
+            setMessage('Error: Something went wrong');
         }
     };
 
@@ -115,7 +116,7 @@ export default function Home() {
                     {message && <p className="mt-4">{message}</p>}
                     {error && (
                         <p className="mt-4 text-red-600">
-                            Error: {error.message}
+                            Opps! Something went wrong
                         </p>
                     )}
                     {isSuccess && (
