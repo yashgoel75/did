@@ -109,9 +109,10 @@ export async function POST(req) {
     
   } catch (error) {
     console.error("Error in auth/token:", error.message, error.stack);
+    const origin = req.headers.get('origin') || '';
     return new Response(
       JSON.stringify({ error: error.message }),
-      { status: 500, headers: addCorsHeaders() }
+      { status: 500, headers: addCorsHeaders({}, origin) }
     );
   }
 }
