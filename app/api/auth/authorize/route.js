@@ -1,4 +1,4 @@
-import { getClient } from "../../../../lib/kv";
+import { getClient } from "../../../../config/clients.js";
 
 export async function GET(req) {
   try {
@@ -17,8 +17,8 @@ export async function GET(req) {
       );
     }
     
-    // Validate clientId exists and redirectUri is authorized
-    const client = await getClient(clientId);
+    // Validate clientId exists and redirectUri is authorized using the hardcoded client list
+    const client = getClient(clientId);
     if (!client || !client.active) {
       return new Response(
         JSON.stringify({ error: "Invalid client ID" }),
