@@ -1,71 +1,13 @@
-import { connectToDatabase } from "../../../../lib/mongodb";
-import crypto from 'crypto';
-
-// Generate client credentials
-function generateClientCredentials() {
-  return {
-    clientId: crypto.randomBytes(16).toString('hex'),
-    clientSecret: crypto.randomBytes(32).toString('hex')
-  };
-}
-
-// Register a new client
-export async function POST(req) {
-  try {
-    const { name, redirectUris, description } = await req.json();
-    
-    if (!name || !redirectUris || !Array.isArray(redirectUris) || redirectUris.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Invalid request parameters" }),
-        { status: 400 }
-      );
-    }
-    
-    const { clientId, clientSecret } = generateClientCredentials();
-    
-    const { db } = await connectToDatabase();
-    const result = await db.collection("oauthClients").insertOne({
-      name,
-      clientId,
-      clientSecret, // In production, hash this before storing
-      redirectUris,
-      description,
-      createdAt: new Date(),
-      active: true
-    });
-    
-    return new Response(
-      JSON.stringify({
-        clientId,
-        clientSecret,
-        name,
-        redirectUris,
-        _id: result.insertedId
-      }),
-      { status: 201 }
-    );
-    
-  } catch (error) {
-    console.error("Error registering client:", error.message);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500 }
-    );
-  }
-}
+import { getAllClients } from "../../../../config/clients";
 
 // Get all registered clients
 export async function GET(req) {
   try {
-    const { db } = await connectToDatabase();
-    const clients = await db.collection("oauthClients")
-      .find({ active: true })
-      .project({ clientSecret: 0 }) // Don't return secrets
-      .toArray();
+    const clients = getAllClients();
     
     return new Response(
       JSON.stringify(clients),
-      { status: 200 }
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
     
   } catch (error) {
@@ -75,4 +17,14 @@ export async function GET(req) {
       { status: 500 }
     );
   }
+}
+
+// POST endpoint is disabled since we're using hardcoded clients
+export async function POST(req) {
+  return new Response(
+    JSON.stringify({ 
+      error: "Client registration is disabled. Using pre-configured clients only." 
+    }),
+    { status: 403 }
+  );
 }
