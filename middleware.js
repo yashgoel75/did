@@ -3,9 +3,12 @@ import { NextResponse } from 'next/server';
 // List of allowed origins
 const allowedOrigins = [
   'http://localhost:5500',
+  'http://127.0.0.1:5500',  // Add this line to allow 127.0.0.1
   'http://localhost:3000',
+  'http://127.0.0.1:3000',  // Add this for consistency
   // Add any other origins that need access to your API
-  'https://yourdomain.com'
+  'https://did-demo-weld.vercel.app/',
+  'https://did-green.vercel.app'
 ];
 
 export function middleware(request) {
@@ -20,7 +23,7 @@ export function middleware(request) {
       const response = new NextResponse(null, { status: 204 });
       
       // Set CORS headers for preflight request
-      response.headers.set('Access-Control-Allow-Origin', isAllowedOrigin ? origin : allowedOrigins[0]);
+      response.headers.set('Access-Control-Allow-Origin', isAllowedOrigin ? origin : '*');
       response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
       response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       response.headers.set('Access-Control-Max-Age', '86400'); // 24 hours
@@ -32,7 +35,7 @@ export function middleware(request) {
     const response = NextResponse.next();
     
     // Add CORS headers to response
-    response.headers.set('Access-Control-Allow-Origin', isAllowedOrigin ? origin : allowedOrigins[0]);
+    response.headers.set('Access-Control-Allow-Origin', isAllowedOrigin ? origin : '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     
