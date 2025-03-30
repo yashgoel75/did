@@ -27,7 +27,7 @@ export async function GET(req) {
     
     return new Response(
       JSON.stringify(profile),
-      { status: 200, ok: true }
+      { status: 200}
     );
     
   } catch (error) {

@@ -16,7 +16,7 @@ export async function POST(req) {
     );
     console.log("MongoDB update result:", result);
 
-    return new Response(JSON.stringify({ success: true, result }), { status: 200 });
+    return new Response(JSON.stringify({ ok: true, success: true, result }), { status: 200 });
   } catch (error) {
     console.error("Error in /api/profile:", error.message);
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
