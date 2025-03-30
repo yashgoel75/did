@@ -2,10 +2,8 @@ import { NextResponse } from 'next/server';
 
 // List of allowed origins
 const allowedOrigins = [
-  'http://localhost:5500',
-  'http://localhost:3000',
-  // Add any other origins that need access to your API
-  'https://yourdomain.com'
+  'https://did-demo-weld.vercel.app/',
+  'https://did-green.vercel.app/',
 ];
 
 export function middleware(request) {

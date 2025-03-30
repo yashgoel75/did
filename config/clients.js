@@ -4,7 +4,7 @@ export const authorizedClients = [
     clientId: 'c910e5d9118d3417234f556887765d73',
     clientSecret: '3dabd8662b412c856230dadca8e2b3ed2821be0249b5478cd446780216da461d',
     name: 'Test Client',
-    redirectUris: ['http://localhost:5500/callback.html'],
+    redirectUris: ['http://did-demo-weld.vercel.app/callback.html'],
     createdAt: new Date().toISOString(),
     active: true
   }
