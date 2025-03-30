@@ -1,4 +1,4 @@
-import { connectToDatabase } from "../../../../lib/mongodb";
+import { getClient } from "../../../../lib/kv";
 
 export async function GET(req) {
   try {
@@ -17,29 +17,23 @@ export async function GET(req) {
       );
     }
     
-    // Validate clientId exists in the database
-    try {
-      const { db } = await connectToDatabase();
-      const client = await db.collection("oauthClients").findOne({ 
-        clientId, 
-        active: true,
-        redirectUris: { $in: [redirectUri] }
-      });
-      
-      if (!client) {
-        console.error("Invalid client or redirect URI:", { clientId, redirectUri });
-        return new Response(
-          JSON.stringify({ error: "Invalid client ID or redirect URI" }),
-          { status: 401 }
-        );
-      }
-    } catch (dbError) {
-      console.error("Database error during client validation:", dbError);
-      throw dbError;
+    // Validate clientId exists and redirectUri is authorized
+    const client = await getClient(clientId);
+    if (!client || !client.active) {
+      return new Response(
+        JSON.stringify({ error: "Invalid client ID" }),
+        { status: 401 }
+      );
+    }
+    
+    if (!client.redirectUris.includes(redirectUri)) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized redirect URI" }),
+        { status: 401 }
+      );
     }
     
     // Construct the absolute URL for the login page
-    // Use the origin from the request URL
     const origin = url.origin;
     const loginUrl = new URL("/auth/login", origin);
     

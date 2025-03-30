@@ -6,9 +6,9 @@ import { useAccount, useReadContract } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { parseAbi } from 'viem';
 
-const CONTRACT_ADDRESS = '0xc84fE0C202E1f00698Fe577363609Df6adD127e3';
+const CONTRACT_ADDRESS = '0xaF52fF3fe18434226749f2CC8652900Cb7f23937';
 const abi = parseAbi([
-  'function getDID(address user) public view returns (string)'
+  'function profiles(address) public view returns (string did, string name, string email)'
 ]);
 
 function LoginPageContent() {
@@ -22,27 +22,25 @@ function LoginPageContent() {
   const redirectUri = searchParams.get('redirect_uri');
   const state = searchParams.get('state');
   
-  // Read DID from contract when wallet is connected
-  const { data: did, isLoading: isLoadingDid } = useReadContract({
+  console.log("Login page params:", { clientId, redirectUri, state });
+  
+  // Read profile directly from the contract when wallet is connected
+  const { data: profile, isLoading: isLoadingProfile } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi,
-    functionName: 'getDID',
-    args: [address]
+    functionName: 'profiles',
+    args: [address],
+    enabled: !!address
   });
 
   const handleAuthorize = async () => {
-    if (!isConnected || !did) {
+    if (!isConnected || !profile || !profile.did) {
       setError("Please connect your wallet and ensure you have a registered DID");
       return;
     }
 
     try {
       setLoading(true);
-      
-      // Get user profile from the database
-      const profileRes = await fetch(`/api/auth/profile?address=${address}`);
-      if (!profileRes.ok) throw new Error("Failed to fetch profile");
-      const profile = await profileRes.json();
       
       // Generate auth code
       const codeRes = await fetch('/api/auth/code', {
@@ -51,11 +49,15 @@ function LoginPageContent() {
         body: JSON.stringify({
           clientId,
           address,
-          did
+          did: profile.did
         })
       });
       
-      if (!codeRes.ok) throw new Error("Failed to generate authorization code");
+      if (!codeRes.ok) {
+        const errorData = await codeRes.json();
+        throw new Error(errorData.error || "Failed to generate authorization code");
+      }
+      
       const { code } = await codeRes.json();
       
       // Redirect back to client with the auth code
@@ -66,8 +68,8 @@ function LoginPageContent() {
       router.push(finalRedirectUri.toString());
       
     } catch (err) {
-      console.error(err);
-      setError("Authentication failed. Please try again.");
+      console.error("Authorization error:", err);
+      setError(err.message || "Authentication failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -85,13 +87,13 @@ function LoginPageContent() {
         {isConnected && (
           <div className="mb-6">
             <p className="mb-2">Connected Wallet: {address}</p>
-            <p className="mb-4">DID: {isLoadingDid ? "Loading..." : (did || "Not registered")}</p>
+            <p className="mb-4">DID: {isLoadingProfile ? "Loading..." : (profile?.did || "Not registered")}</p>
             
             <button
               onClick={handleAuthorize}
-              disabled={loading || !did}
+              disabled={loading || isLoadingProfile || !profile?.did}
               className={`w-full p-3 text-white rounded ${
-                loading || !did ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                loading || isLoadingProfile || !profile?.did ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
               }`}
             >
               {loading ? "Authorizing..." : "Authorize"}

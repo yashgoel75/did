@@ -1,5 +1,5 @@
-import { connectToDatabase } from "../../../../lib/mongodb";
 import crypto from 'crypto';
+import { getAuthCode, markAuthCodeAsUsed, storeAccessToken, getClient } from "../../../../lib/kv";
 
 // Function to generate a token
 function generateToken() {
@@ -20,31 +20,26 @@ export async function POST(req) {
       );
     }
     
-    // Verify client credentials (in a production app, verify client_secret)
-    const { db } = await connectToDatabase();
-    const client = await db.collection("oauthClients").findOne({
-      clientId: client_id,
-      active: true
-    });
-    
-    if (!client) {
+    // Verify client credentials
+    const client = await getClient(client_id);
+    if (!client || !client.active) {
       return new Response(
         JSON.stringify({ error: "Invalid client ID" }),
         { status: 401 }
       );
     }
     
-    // In production, you would also verify client_secret here
+    // In production, verify client_secret
+    if (client_secret && client.clientSecret !== client_secret) {
+      return new Response(
+        JSON.stringify({ error: "Invalid client credentials" }),
+        { status: 401 }
+      );
+    }
     
     // Find and validate the authorization code
-    const authCode = await db.collection("authCodes").findOne({ 
-      code, 
-      clientId: client_id,
-      used: false,
-      expiresAt: { $gt: new Date() }
-    });
-    
-    if (!authCode) {
+    const authCode = await getAuthCode(code);
+    if (!authCode || authCode.used || authCode.clientId !== client_id) {
       return new Response(
         JSON.stringify({ error: "Invalid or expired authorization code" }),
         { status: 400 }
@@ -52,23 +47,19 @@ export async function POST(req) {
     }
     
     // Mark the code as used
-    await db.collection("authCodes").updateOne(
-      { _id: authCode._id },
-      { $set: { used: true } }
-    );
+    await markAuthCodeAsUsed(code);
     
     // Generate access token
     const accessToken = generateToken();
-    const expiresIn = 3600; // 1 hour
+    const expiresIn = 604800; // 7 days (in seconds)
     
-    // Store the token
-    await db.collection("accessTokens").insertOne({
+    // Store the token with expiration
+    await storeAccessToken(accessToken, {
       token: accessToken,
       clientId: client_id,
       address: authCode.address,
       did: authCode.did,
-      createdAt: new Date(),
-      expiresAt: new Date(Date.now() + expiresIn * 1000)
+      createdAt: new Date().toISOString(),
     });
     
     console.log("Token generated successfully for DID:", authCode.did);
@@ -80,7 +71,7 @@ export async function POST(req) {
         expires_in: expiresIn,
         did: authCode.did
       }),
-      { status: 200 }
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
     
   } catch (error) {

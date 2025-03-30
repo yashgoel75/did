@@ -1,5 +1,5 @@
-import { connectToDatabase } from "../../../../lib/mongodb";
 import crypto from 'crypto';
+import { storeClient, getAllClients } from "../../../../lib/kv";
 
 // Generate client credentials
 function generateClientCredentials() {
@@ -23,26 +23,28 @@ export async function POST(req) {
     
     const { clientId, clientSecret } = generateClientCredentials();
     
-    const { db } = await connectToDatabase();
-    const result = await db.collection("oauthClients").insertOne({
-      name,
+    const clientData = {
       clientId,
-      clientSecret, // In production, hash this before storing
+      clientSecret,
+      name,
       redirectUris,
       description,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       active: true
-    });
+    };
+    
+    // Store in Vercel KV
+    await storeClient(clientId, clientData);
+    
+    // Don't return the secret in the response
+    const { clientSecret: _, ...clientResponse } = clientData;
     
     return new Response(
       JSON.stringify({
-        clientId,
-        clientSecret,
-        name,
-        redirectUris,
-        _id: result.insertedId
+        ...clientResponse,
+        clientSecret
       }),
-      { status: 201 }
+      { status: 201, headers: { 'Content-Type': 'application/json' } }
     );
     
   } catch (error) {
@@ -57,15 +59,14 @@ export async function POST(req) {
 // Get all registered clients
 export async function GET(req) {
   try {
-    const { db } = await connectToDatabase();
-    const clients = await db.collection("oauthClients")
-      .find({ active: true })
-      .project({ clientSecret: 0 }) // Don't return secrets
-      .toArray();
+    const clients = await getAllClients();
+    
+    // Remove secrets before returning
+    const safeClients = clients.map(({ clientSecret, ...client }) => client);
     
     return new Response(
-      JSON.stringify(clients),
-      { status: 200 }
+      JSON.stringify(safeClients),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
     
   } catch (error) {
