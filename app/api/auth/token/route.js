@@ -1,5 +1,5 @@
 import { getClient } from "../../../../config/clients";
-import { getAuthCode, markAuthCodeAsUsed, generateToken, storeAccessToken, logStoreState } from "../../../../lib/fileStore";
+import { getAuthCode, markAuthCodeAsUsed, generateToken, storeAccessToken, logStoreState } from "../../../../lib/firestore";
 import { addCorsHeaders } from "../../../../utils/cors";
 
 // Handle CORS preflight requests

@@ -8,6 +8,7 @@ export function addCorsHeaders(headers = {}, origin = null) {
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'https://did-green.vercel.app',
+    'https://did-hero.vercel.app',
     'https://did-demo-weld.vercel.app/'
   ];
   
