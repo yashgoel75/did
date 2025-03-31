@@ -106,12 +106,7 @@ function LoginPage() {
         // Display success notification with user's name if available
         setNotification(`${parsedProfile.name || 'Account'} verified successfully!`);
         setLoading(false);
-        
-        // Hide notification after 3 seconds
-        setTimeout(() => {
-          setNotification(null);
-        }, 3000);
-      }, 1500); // Show after 1.5 seconds of simulated "loading"
+      }, 3000); // Show after 1.5 seconds of simulated "loading"
       
     } catch (err) {
       console.error("Authorization error:", err);
