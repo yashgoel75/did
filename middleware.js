@@ -43,10 +43,16 @@ export function middleware(request) {
     return response;
   }
   
-  return NextResponse.next();
+  // Get the response
+  const response = NextResponse.next();
+  
+  // Allow postMessage communication with the client demo app
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  
+  return response;
 }
 
 // Configure which paths this middleware applies to
 export const config = {
-  matcher: ['/api/:path*']
+  matcher: ['/api/:path*', '/auth/:path*']
 };

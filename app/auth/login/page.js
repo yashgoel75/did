@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import { useAccount, useReadContract } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { parseAbi } from 'viem';
-import dynamic from 'next/dynamic';
 
 const CONTRACT_ADDRESS = '0xaF52fF3fe18434226749f2CC8652900Cb7f23937';
 const abi = parseAbi([
@@ -40,6 +39,7 @@ function LoginPage() {
   const [debug, setDebug] = useState({});
   const [parsedProfile, setParsedProfile] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [isPopup, setIsPopup] = useState(false);
   
   const { address, isConnected } = useAccount();
   
@@ -47,7 +47,12 @@ function LoginPage() {
   const redirectUri = searchParams.get('redirect_uri');
   const state = searchParams.get('state');
   
-  console.log("Login page params:", { clientId, redirectUri, state });
+  // Check if this is opened in a popup window
+  useEffect(() => {
+    setIsPopup(window.opener !== null && state === 'popup_flow');
+  }, [state]);
+  
+  console.log("Login page params:", { clientId, redirectUri, state, isPopup });
   
   // Read profile directly from the contract when wallet is connected
   const { data: rawProfile, isLoading: isLoadingProfile, isError, error: contractError } = useReadContract({
@@ -104,13 +109,29 @@ function LoginPage() {
       // Simple timeout to simulate processing
       setTimeout(() => {
         // Display success notification with user's name if available
-        setNotification(`${parsedProfile.name || 'Account'} verified successfully!`);
+        const userName = parsedProfile.name || 'Account';
+        setNotification(`${userName} verified successfully!`);
         setLoading(false);
         
-        // Hide notification after 3 seconds
-        setTimeout(() => {
-          setNotification(null);
-        }, 3000);
+        // If in a popup window, send message to parent
+        if (isPopup && window.opener) {
+          try {
+            // Send message to parent window
+            window.opener.postMessage({
+              type: 'did-auth-success',
+              name: userName,
+              did: parsedProfile.did,
+              address: address
+            }, '*'); // In production, specify exact origin instead of '*'
+            
+            // Close popup after 2 seconds
+            setTimeout(() => {
+              window.close();
+            }, 2000);
+          } catch (err) {
+            console.error("Error communicating with parent window:", err);
+          }
+        }
       }, 1500); // Show after 1.5 seconds of simulated "loading"
       
     } catch (err) {
@@ -123,6 +144,20 @@ function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        {isPopup && (
+          <div className="absolute top-4 right-4">
+            <button 
+              onClick={() => window.close()}
+              className="text-gray-500 hover:text-gray-700"
+              aria-label="Close popup"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        )}
+      
         <h1 className="text-2xl font-bold mb-6 text-center">Sign in with DID Authenticator</h1>
         
         {/* Show notification when active */}
