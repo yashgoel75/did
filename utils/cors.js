@@ -9,7 +9,7 @@ export function addCorsHeaders(headers = {}, origin = null) {
     'http://127.0.0.1:3000',
     'https://did-green.vercel.app',
     'https://did-hero.vercel.app',
-    'https://did-demo-weld.vercel.app/'
+    'https://did-demo-weld.vercel.app'
   ];
   
   // If a specific origin is provided and it's in the allowed list, use it
