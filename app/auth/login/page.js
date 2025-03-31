@@ -141,13 +141,20 @@ function LoginPage() {
         
         {isConnected && (
           <div className="mb-6">
-            <p className="mb-2">Connected Wallet: {address}</p>
-            <p className="mb-4">DID: {isLoadingProfile ? "Loading..." : (parsedProfile?.did || "Not registered")}</p>
+            {/* Make wallet address wrap with overflow */}
+            <p className="mb-2 break-all">
+              <span className="font-medium">Connected Wallet:</span> {address}
+            </p>
+            
+            {/* Make DID wrap properly with overflow protection */}
+            <p className="mb-4 break-all">
+              <span className="font-medium">DID:</span> {isLoadingProfile ? "Loading..." : (parsedProfile?.did || "Not registered")}
+            </p>
             
             {parsedProfile?.did && (
               <div className="mb-4 text-sm">
-                <p>Name: {parsedProfile.name || "Not provided"}</p>
-                <p>Email: {parsedProfile.email || "Not provided"}</p>
+                <p><span className="font-medium">Name:</span> {parsedProfile.name || "Not provided"}</p>
+                <p><span className="font-medium">Email:</span> {parsedProfile.email || "Not provided"}</p>
               </div>
             )}
             
