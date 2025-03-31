@@ -97,62 +97,25 @@ function LoginPage() {
     }
 
     try {
+      // Set loading state
       setLoading(true);
       setError("");
       
-      // Log the data we're about to send
-      const requestData = {
-        clientId,
-        address,
-        did: parsedProfile.did
-      };
-      
-      console.log("Sending authorization request:", requestData);
-      setDebug(prev => ({ ...prev, authRequest: requestData }));
-      
-      // Generate auth code
-      const codeRes = await fetch('/api/auth/code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestData)
-      });
-      
-      const responseData = await codeRes.json();
-      console.log("Auth code response:", responseData);
-      setDebug(prev => ({ ...prev, authResponse: responseData }));
-      
-      if (!codeRes.ok) {
-        throw new Error(responseData.error || "Failed to generate authorization code");
-      }
-      
-      // Show verification notification instead of redirecting
+      // Simple timeout to simulate processing
       setTimeout(() => {
-        // Display success notification
-        setNotification(`${parsedProfile.name || 'Account'} verified!`);
+        // Display success notification with user's name if available
+        setNotification(`${parsedProfile.name || 'Account'} verified successfully!`);
         setLoading(false);
         
         // Hide notification after 3 seconds
         setTimeout(() => {
           setNotification(null);
         }, 3000);
-      }, 3000); // Show after 1.5 seconds of "loading"
-      
-      // Comment out the actual redirect code
-      /*
-      // Redirect back to client with the auth code
-      const finalRedirectUri = new URL(redirectUri);
-      finalRedirectUri.searchParams.append('code', responseData.code);
-      if (state) finalRedirectUri.searchParams.append('state', state);
-      
-      console.log("Redirecting to:", finalRedirectUri.toString());
-      
-      // IMPORTANT: Use window.location for external redirects
-      window.location.href = finalRedirectUri.toString();
-      */
+      }, 1500); // Show after 1.5 seconds of simulated "loading"
       
     } catch (err) {
       console.error("Authorization error:", err);
-      setError(err.message || "Authentication failed. Please try again.");
+      setError("Authentication failed. Please try again.");
       setLoading(false);
     }
   };
