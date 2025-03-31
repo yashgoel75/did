@@ -3,27 +3,34 @@ import { getAuthCode, markAuthCodeAsUsed, generateToken, storeAccessToken, logSt
 import { addCorsHeaders } from "../../../../utils/cors";
 
 // Handle CORS preflight requests
-export async function OPTIONS() {
+export async function OPTIONS(req) {
+  // Get origin for CORS
+  const origin = req.headers.get('origin') || '';
+  
   return new Response(null, {
     status: 204,
     headers: addCorsHeaders({ 
       'Access-Control-Allow-Methods': 'POST, OPTIONS' 
-    })
+    }, origin)
   });
 }
 
 export async function POST(req) {
   try {
+    // Get origin for CORS
+    const origin = req.headers.get('origin') || '';
+    console.log("Request origin:", origin);
+    
     const data = await req.json();
     const { code, client_id, client_secret } = data;
     
     console.log("Token request received:", { code, client_id });
-    logStoreState(); // Log current state of auth codes
+    await logStoreState(); // Need await for async function
     
     if (!code || !client_id) {
       return new Response(
         JSON.stringify({ error: "Missing required parameters" }),
-        { status: 400, headers: addCorsHeaders() }
+        { status: 400, headers: addCorsHeaders({}, origin) }
       );
     }
     
@@ -33,7 +40,7 @@ export async function POST(req) {
       console.log("Invalid client ID:", client_id);
       return new Response(
         JSON.stringify({ error: "Invalid client ID" }),
-        { status: 401, headers: addCorsHeaders() }
+        { status: 401, headers: addCorsHeaders({}, origin) }
       );
     }
     
@@ -42,35 +49,42 @@ export async function POST(req) {
       console.log("Invalid client secret");
       return new Response(
         JSON.stringify({ error: "Invalid client credentials" }),
-        { status: 401, headers: addCorsHeaders() }
+        { status: 401, headers: addCorsHeaders({}, origin) }
       );
     }
     
-    // Find and validate the authorization code
-    const authCode = getAuthCode(code);
+    // Find and validate the authorization code - MUST USE AWAIT
+    const authCode = await getAuthCode(code);
     console.log("Auth code lookup result:", authCode ? "Found" : "Not found");
     
     if (!authCode) {
       return new Response(
         JSON.stringify({ error: "Invalid or expired authorization code" }),
-        { status: 400, headers: addCorsHeaders() }
+        { status: 400, headers: addCorsHeaders({}, origin) }
       );
     }
+    
+    console.log("Auth code details:", { 
+      codeClientId: authCode.clientId, 
+      requestClientId: client_id,
+      did: authCode.did,
+      used: authCode.used 
+    });
     
     if (authCode.clientId !== client_id) {
       console.log("Client ID mismatch:", { codeClientId: authCode.clientId, requestClientId: client_id });
       return new Response(
         JSON.stringify({ error: "Authorization code was not issued for this client" }),
-        { status: 400, headers: addCorsHeaders() }
+        { status: 400, headers: addCorsHeaders({}, origin) }
       );
     }
     
-    // Mark the code as used
-    const marked = markAuthCodeAsUsed(code);
+    // Mark the code as used - MUST USE AWAIT
+    const marked = await markAuthCodeAsUsed(code);
     if (!marked) {
       return new Response(
         JSON.stringify({ error: "Failed to process authorization code" }),
-        { status: 500, headers: addCorsHeaders() }
+        { status: 500, headers: addCorsHeaders({}, origin) }
       );
     }
     
@@ -87,11 +101,12 @@ export async function POST(req) {
       createdAt: new Date().toISOString()
     };
     
-    const stored = storeAccessToken(tokenData);
+    // MUST USE AWAIT
+    const stored = await storeAccessToken(tokenData);
     if (!stored) {
       return new Response(
         JSON.stringify({ error: "Failed to store access token" }),
-        { status: 500, headers: addCorsHeaders() }
+        { status: 500, headers: addCorsHeaders({}, origin) }
       );
     }
     
@@ -104,7 +119,7 @@ export async function POST(req) {
         expires_in: expiresIn,
         did: authCode.did
       }),
-      { status: 200, headers: addCorsHeaders() }
+      { status: 200, headers: addCorsHeaders({}, origin) }
     );
     
   } catch (error) {

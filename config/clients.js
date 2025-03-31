@@ -28,3 +28,30 @@ export function registerClient({ name, redirectUris, description }) {
   console.log('Client registration attempted but disabled:', { name, redirectUris, description });
   return null;
 }
+
+const clients = [
+  {
+    id: 'c910e5d9118d3417234f556887765d73', // This must match what's in callback.html
+    name: 'Test Client',
+    active: true,
+    clientSecret: '3dabd8662b412c856230dadca8e2b3ed2821be0249b5478cd446780216da461d',
+    redirectUris: [
+      'http://localhost:5500/callback.html',
+      'http://127.0.0.1:5500/callback.html',
+      'https://did-demo-weld.vercel.app/callback.html'
+    ]
+  }
+];
+
+export function getClient(id) {
+  if (!id) return null;
+  
+  // Always compare as strings
+  const clientId = String(id);
+  
+  // Log to help with debugging
+  console.log("Looking for client ID:", clientId);
+  console.log("Available clients:", clients.map(c => c.id));
+  
+  return clients.find(client => String(client.id) === clientId) || null;
+}
