@@ -42,16 +42,16 @@ A decentralized identity (DID) management application built with Next.js, Wagmi,
 
 ## Table of Contents
 
-- Overview (#overview)
-- Features (#features)
-- Tech Stack (#tech-stack)
-- Prerequisites (#prerequisites)
-- Installation (#installation)
-- Smart Contract Deployment (#smart-contract-deployment)
-- Usage (#usage)
-- Project Structure (#project-structure)
-- Contributing (#contributing)
-- License (#license)
+- [Overview] (#overview)
+- [Features] (#features)
+- [`Tech Stack`] (#tech-stack)
+- [Prerequisites] (#prerequisites)
+- [Installation] (#installation)
+- [`Smart Contract Deployment`] (#smart-contract-deployment)
+- [Usage] (#usage)
+- `Project Structure` (#project-structure)
+- `Contributing` (#contributing)
+- `License` (#license)
 
 ## Overview
 The DID Authenticator is a web application that enables users to create and manage decentralized identities on the Ethereum blockchain. Each user can register a unique DID (in the format did:eth:<address>), along with their name and email, which is stored on-chain using a Solidity smart contract. The application also allows users to search for profiles by DID. The frontend is built with Next.js, and wallet interactions are handled using Wagmi and RainbowKit.
@@ -69,7 +69,7 @@ The smart contract ensures that:
 - **Responsive UI:** Clean and user-friendly interface built with Tailwind CSS.
 
 ## Tech Stack
-- Frontend: Next.js, React, Tailwind CSS
+- **Frontend:** Next.js, React, Tailwind CSS
 - **Blockchain Interaction:** Wagmi, RainbowKit, Viem
 - **Smart Contract:** Solidity (deployed on Sepolia testnet)
 - **Development Tool:** Foundry (for compiling, testing, and deploying the smart contract)
