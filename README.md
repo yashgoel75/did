@@ -42,16 +42,16 @@ A decentralized identity (DID) management application built with Next.js, Wagmi,
 
 ## Table of Contents
 
-- [Overview] (#overview)
-- [Features] (#features)
-- [`Tech Stack`] (#tech-stack)
-- [Prerequisites] (#prerequisites)
-- [Installation] (#installation)
-- [`Smart Contract Deployment`] (#smart-contract-deployment)
+- [Overview] (https://github.com/yashgoel75/did/blob/main/README.md#overview)
+- [Features] (https://github.com/yashgoel75/did/blob/main/README.md#features)
+- [`Tech Stack`] (https://github.com/yashgoel75/did/blob/main/README.md#tech-stack)
+- [Prerequisites] (https://github.com/yashgoel75/did/blob/main/README.md#prerequisites)
+- [Installation] (https://github.com/yashgoel75/did/blob/main/README.md#installation)
+- [`Smart Contract Deployment`] (https://github.com/yashgoel75/did/blob/main/README.md#smart-contract-deployment)
 - [Usage] (#usage)
-- `Project Structure` (#project-structure)
-- `Contributing` (#contributing)
-- `License` (#license)
+- `Project Structure` (https://github.com/yashgoel75/did/blob/main/README.md#project-structure)
+- `Contributing` (https://github.com/yashgoel75/did/blob/main/README.md#contributing)
+- `License` (https://github.com/yashgoel75/did/blob/main/README.md#license)
 
 ## Overview
 The DID Authenticator is a web application that enables users to create and manage decentralized identities on the Ethereum blockchain. Each user can register a unique DID (in the format did:eth:<address>), along with their name and email, which is stored on-chain using a Solidity smart contract. The application also allows users to search for profiles by DID. The frontend is built with Next.js, and wallet interactions are handled using Wagmi and RainbowKit.
