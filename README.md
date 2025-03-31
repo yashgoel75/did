@@ -171,7 +171,7 @@ did/
 │   ├── layout.js             # Root layout with Wagmi and RainbowKit providers
 │   └── globals.css           # Global styles (Tailwind CSS)
 ├── contracts/
-│   ├── src/
+│   └── src/
 │       └── DIDRegistry.sol   # Smart contract for DID management
 ├── public/                   # Static assets
 ├── package.json              # Project dependencies and scripts
