@@ -39,6 +39,7 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [debug, setDebug] = useState({});
   const [parsedProfile, setParsedProfile] = useState(null);
+  const [notification, setNotification] = useState(null);
   
   const { address, isConnected } = useAccount();
   
@@ -124,6 +125,20 @@ function LoginPage() {
         throw new Error(responseData.error || "Failed to generate authorization code");
       }
       
+      // Show verification notification instead of redirecting
+      setTimeout(() => {
+        // Display success notification
+        setNotification(`${parsedProfile.name || 'Account'} verified!`);
+        setLoading(false);
+        
+        // Hide notification after 3 seconds
+        setTimeout(() => {
+          setNotification(null);
+        }, 3000);
+      }, 3000); // Show after 1.5 seconds of "loading"
+      
+      // Comment out the actual redirect code
+      /*
       // Redirect back to client with the auth code
       const finalRedirectUri = new URL(redirectUri);
       finalRedirectUri.searchParams.append('code', responseData.code);
@@ -133,11 +148,11 @@ function LoginPage() {
       
       // IMPORTANT: Use window.location for external redirects
       window.location.href = finalRedirectUri.toString();
+      */
       
     } catch (err) {
       console.error("Authorization error:", err);
       setError(err.message || "Authentication failed. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
@@ -146,6 +161,16 @@ function LoginPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">Sign in with DID Authenticator</h1>
+        
+        {/* Show notification when active */}
+        {notification && (
+          <div className="mb-6 p-3 bg-green-100 text-green-700 rounded-lg flex items-center justify-center">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>{notification}</span>
+          </div>
+        )}
         
         <div className="mb-6 flex justify-center">
           <ConnectButton />
