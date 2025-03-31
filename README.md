@@ -142,7 +142,7 @@ forge create --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY src/DIDRegist
 - After deployment, Foundry will output the contract address (e.g., [`Deployed to: 0x73d45fd6F1B835391161216088CbfBe1CEa62290`]).
 - Note the deployed contract address.
 
-5. Update Contract Address in Frontend:
+5. **Update Contract Address in Frontend:**
 In [`app/page.js`], update the [`CONTRACT_ADDRESS`] with the deployed address:
 ```javascript
 const CONTRACT_ADDRESS = "your-deployed-contract-address";
