@@ -4,6 +4,7 @@ import { createPublicClient, http } from 'viem';
 import { sepolia } from 'viem/chains';
 import { parseAbi } from 'viem';
 import { addCorsHeaders } from "../../../../utils/cors";
+import { getAdminDb } from "../../../../lib/firebase-admin";
 
 // Contract configuration
 const CONTRACT_ADDRESS = "0xaF52fF3fe18434226749f2CC8652900Cb7f23937";
@@ -45,6 +46,16 @@ export async function POST(req) {
   try {
     const origin = req.headers.get('origin') || '';
     console.log("Request origin:", origin);
+    
+    // Check Firebase connection first
+    const db = getAdminDb();
+    if (!db) {
+      console.error("Firebase Admin not initialized");
+      return new Response(
+        JSON.stringify({ error: "Database connection error. Please try again later." }),
+        { status: 500, headers: addCorsHeaders({}, origin) }
+      );
+    }
     
     const { clientId, address, did } = await req.json();
     
@@ -123,29 +134,51 @@ export async function POST(req) {
       used: false
     };
     
-    // MUST USE AWAIT
-    const success = await storeAuthCode(codeData);
+    // Log the operation details
+    console.log("Attempting to store auth code in Firestore:", {
+      code: code.substring(0, 8) + '...',
+      clientId,
+      did
+    });
     
-    if (!success) {
+    try {
+      // MUST USE AWAIT
+      const success = await storeAuthCode(codeData);
+      
+      if (!success) {
+        console.error("Failed to store authorization code - no error thrown but operation failed");
+        return new Response(
+          JSON.stringify({ error: "Failed to store authorization code" }), 
+          { status: 500, headers: addCorsHeaders({}, origin) }
+        );
+      }
+      
+      console.log("Auth code generated successfully:", { code: code.substring(0, 8) + '...', clientId });
+      await logStoreState(); // Log the state after adding the code
+      
       return new Response(
-        JSON.stringify({ error: "Failed to store authorization code" }), 
+        JSON.stringify({ code }),
+        { status: 200, headers: addCorsHeaders({}, origin) }
+      );
+    } catch (dbError) {
+      console.error("Database error storing auth code:", dbError);
+      return new Response(
+        JSON.stringify({ 
+          error: "Database error storing authorization code", 
+          details: dbError.message 
+        }), 
         { status: 500, headers: addCorsHeaders({}, origin) }
       );
     }
     
-    console.log("Auth code generated successfully:", { code, clientId });
-    await logStoreState(); // Log the state after adding the code
-    
-    return new Response(
-      JSON.stringify({ code }),
-      { status: 200, headers: addCorsHeaders({}, origin) }
-    );
-    
   } catch (error) {
-    console.error("Error in auth/code:", error.message);
+    console.error("Error in auth/code:", error.message, error.stack);
     const origin = req.headers.get('origin') || '';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      }),
       { status: 500, headers: addCorsHeaders({}, origin) }
     );
   }
