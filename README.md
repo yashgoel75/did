@@ -1,41 +1,3 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-
 # DID Authenticator
 
 A decentralized identity (DID) management application built with Next.js, Wagmi, RainbowKit, and a Solidity smart contract. This project allows users to register a unique DID (Decentralized Identifier) along with their name and email, store it on the Ethereum Sepolia testnet, and search for profiles by DID.
@@ -44,17 +6,17 @@ A decentralized identity (DID) management application built with Next.js, Wagmi,
 
 - [Overview](https://github.com/yashgoel75/did/blob/main/README.md#overview)
 - [Features](https://github.com/yashgoel75/did/blob/main/README.md#features)
-- [`Tech Stack`](https://github.com/yashgoel75/did/blob/main/README.md#tech-stack)
+- [Tech Stack](https://github.com/yashgoel75/did/blob/main/README.md#tech-stack)
 - [Prerequisites](https://github.com/yashgoel75/did/blob/main/README.md#prerequisites)
 - [Installation](https://github.com/yashgoel75/did/blob/main/README.md#installation)
-- [`Smart Contract Deployment`](https://github.com/yashgoel75/did/blob/main/README.md#smart-contract-deployment)
+- [Smart Contract Deployment](https://github.com/yashgoel75/did/blob/main/README.md#smart-contract-deployment)
 - [Usage](#usage)
-- [`Project Structure`](https://github.com/yashgoel75/did/blob/main/README.md#project-structure)
-- [`Contributing`](https://github.com/yashgoel75/did/blob/main/README.md#contributing)
-- [`License`](https://github.com/yashgoel75/did/blob/main/README.md#license)
+- [Project Structure](https://github.com/yashgoel75/did/blob/main/README.md#project-structure)
+- [Contributing](https://github.com/yashgoel75/did/blob/main/README.md#contributing)
+- [License](https://github.com/yashgoel75/did/blob/main/README.md#license)
 
 ## Overview
-The DID Authenticator is a web application that enables users to create and manage decentralized identities on the Ethereum blockchain. Each user can register a unique DID (in the format did:eth:<address>), along with their name and email, which is stored on-chain using a Solidity smart contract. The application also allows users to search for profiles by DID. The frontend is built with Next.js, and wallet interactions are handled using Wagmi and RainbowKit.
+The DID Authenticator is a web application that enables users to create and manage decentralized identities on the Ethereum blockchain. Each user can register a unique DID (in the format did:eth:`<address>`), along with their name and email, which is stored on-chain using a Solidity smart contract. The application also allows users to search for profiles by DID. The frontend is built with Next.js, and wallet interactions are handled using Wagmi and RainbowKit.
 
 The smart contract ensures that:
 - Each Ethereum address can register only one DID.
