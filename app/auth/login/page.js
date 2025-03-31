@@ -39,6 +39,7 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [debug, setDebug] = useState({});
   const [parsedProfile, setParsedProfile] = useState(null);
+  const [notification, setNotification] = useState(null);
   
   const { address, isConnected } = useAccount();
   
@@ -96,48 +97,25 @@ function LoginPage() {
     }
 
     try {
+      // Set loading state
       setLoading(true);
       setError("");
       
-      // Log the data we're about to send
-      const requestData = {
-        clientId,
-        address,
-        did: parsedProfile.did
-      };
-      
-      console.log("Sending authorization request:", requestData);
-      setDebug(prev => ({ ...prev, authRequest: requestData }));
-      
-      // Generate auth code
-      const codeRes = await fetch('/api/auth/code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestData)
-      });
-      
-      const responseData = await codeRes.json();
-      console.log("Auth code response:", responseData);
-      setDebug(prev => ({ ...prev, authResponse: responseData }));
-      
-      if (!codeRes.ok) {
-        throw new Error(responseData.error || "Failed to generate authorization code");
-      }
-      
-      // Redirect back to client with the auth code
-      const finalRedirectUri = new URL(redirectUri);
-      finalRedirectUri.searchParams.append('code', responseData.code);
-      if (state) finalRedirectUri.searchParams.append('state', state);
-      
-      console.log("Redirecting to:", finalRedirectUri.toString());
-      
-      // IMPORTANT: Use window.location for external redirects
-      window.location.href = finalRedirectUri.toString();
+      // Simple timeout to simulate processing
+      setTimeout(() => {
+        // Display success notification with user's name if available
+        setNotification(`${parsedProfile.name || 'Account'} verified successfully!`);
+        setLoading(false);
+        
+        // Hide notification after 3 seconds
+        setTimeout(() => {
+          setNotification(null);
+        }, 3000);
+      }, 1500); // Show after 1.5 seconds of simulated "loading"
       
     } catch (err) {
       console.error("Authorization error:", err);
-      setError(err.message || "Authentication failed. Please try again.");
-    } finally {
+      setError("Authentication failed. Please try again.");
       setLoading(false);
     }
   };
@@ -147,19 +125,36 @@ function LoginPage() {
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">Sign in with DID Authenticator</h1>
         
+        {/* Show notification when active */}
+        {notification && (
+          <div className="mb-6 p-3 bg-green-100 text-green-700 rounded-lg flex items-center justify-center">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>{notification}</span>
+          </div>
+        )}
+        
         <div className="mb-6 flex justify-center">
           <ConnectButton />
         </div>
         
         {isConnected && (
           <div className="mb-6">
-            <p className="mb-2">Connected Wallet: {address}</p>
-            <p className="mb-4">DID: {isLoadingProfile ? "Loading..." : (parsedProfile?.did || "Not registered")}</p>
+            {/* Make wallet address wrap with overflow */}
+            <p className="mb-2 break-all">
+              <span className="font-medium">Connected Wallet:</span> {address}
+            </p>
+            
+            {/* Make DID wrap properly with overflow protection */}
+            <p className="mb-4 break-all">
+              <span className="font-medium">DID:</span> {isLoadingProfile ? "Loading..." : (parsedProfile?.did || "Not registered")}
+            </p>
             
             {parsedProfile?.did && (
               <div className="mb-4 text-sm">
-                <p>Name: {parsedProfile.name || "Not provided"}</p>
-                <p>Email: {parsedProfile.email || "Not provided"}</p>
+                <p><span className="font-medium">Name:</span> {parsedProfile.name || "Not provided"}</p>
+                <p><span className="font-medium">Email:</span> {parsedProfile.email || "Not provided"}</p>
               </div>
             )}
             

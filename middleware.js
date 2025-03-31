@@ -7,10 +7,9 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',  // Add this for consistency
   // Add any other origins that need access to your API
-  'https://did-demo-weld.vercel.app/',
+  'https://did-demo-weld.vercel.app',
   'https://did-green.vercel.app',
-  'https://did-demo-weld.vercel.app/',
-  'https://did-green.vercel.app/',
+  'https://did-hero.vercel.app',
 ];
 
 export function middleware(request) {

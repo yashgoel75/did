@@ -1,5 +1,24 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
+  
+  // Disable filesystem operations in serverless environments
+  webpack: (config, { isServer, dev }) => {
+    // If we're in production and in a serverless environment
+    if (!dev && isServer) {
+      // Replace native Node.js modules with empty objects
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: require.resolve('crypto-browserify'),
+      };
+    }
+    
+    return config;
+  },
+  
   // Enable CORS for API routes
   async headers() {
     return [

@@ -1,9 +1,9 @@
-import { getAllClients } from "../../../../config/clients";
+import { getActiveClients } from "../../../../config/clients";
 
 // Get all registered clients
 export async function GET(req) {
   try {
-    const clients = getAllClients();
+    const clients = getActiveClients();
     
     return new Response(
       JSON.stringify(clients),

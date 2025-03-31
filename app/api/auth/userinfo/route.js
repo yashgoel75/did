@@ -1,4 +1,4 @@
-import { getAccessToken } from "../../../../lib/fileStore";
+import { getAccessToken } from "../../../../lib/firestore";
 import { createPublicClient, http } from 'viem';
 import { sepolia } from 'viem/chains';
 import { parseAbi } from 'viem';
