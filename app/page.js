@@ -15,7 +15,7 @@ const abi = parseAbi([
 
 export default function Home() {
   const { address, isConnected } = useAccount();
-  const [isClient, setIsClient] = useState(false); // New state to track client-side rendering
+  const [isClient, setIsClient] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [searchDid, setSearchDid] = useState("");
   const [searchResult, setSearchResult] = useState(null);
@@ -31,7 +31,7 @@ export default function Home() {
     abi,
     functionName: "profiles",
     args: [address],
-    query: { enabled: !!address }, // Only fetch when address is available
+    query: { enabled: !!address },
   });
 
   const { data: searchedProfile, refetch: refetchSearch } = useReadContract({
@@ -42,17 +42,11 @@ export default function Home() {
     query: { enabled: !!searchDid },
   });
 
-  // Set isClient to true only on the client side
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   useEffect(() => {
-    console.log("Profile data:", profile);
-  }, [profile]);
-
-  useEffect(() => {
-    console.log("Searched profile data:", searchedProfile);
     if (searchedProfile) {
       setSearchResult({
         name: searchedProfile[0],
@@ -111,29 +105,47 @@ export default function Home() {
     }
   }, [hash, isConfirming, isConfirmed, error, refetch]);
 
-  // Render minimal content on the server, full content on the client
   if (!isClient) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 p-6">
         <ConnectButton />
-        <h1 className="text-3xl font-bold mt-6 mb-4">DID Authenticator</h1>
-        <p>Loading...</p>
+        <h1 className="text-4xl font-extrabold text-gray-800 mt-8">DID Authenticator</h1>
+        <p className="text-gray-500 mt-2">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-      <ConnectButton />
-      <h1 className="text-3xl font-bold mt-6 mb-4">DID Authenticator</h1>
-      {!isConnected && <p>Please connect your wallet to continue.</p>}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 p-6">
+      <div className="flex flex-col items-center mb-8">
+        <ConnectButton />
+        <h1 className="text-4xl font-extrabold text-gray-800 mt-6">DID Authenticator</h1>
+        {!isConnected && (
+          <p className="text-gray-600 mt-2">Please connect your wallet to continue.</p>
+        )}
+      </div>
+
       {isConnected && (
-        <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-          <p className="mb-4">Wallet: {address}</p>
-          <p className="mb-4">DID: {profile?.did || "Not registered yet"}</p>
-          <p className="mb-4">Name: {profile?.name || "Not set"}</p>
-          <p className="mb-4">Email: {profile?.email || "Not set"}</p>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8">
+          <div className="space-y-4">
+            <div className="text-base text-gray-700 break-words">
+              <span className="font-semibold">Wallet:</span> {address}
+            </div>
+            <div className="text-base text-gray-700 break-words">
+              <span className="font-semibold">DID:</span>{" "}
+              {profile ? profile[0] : "Not registered yet"}
+            </div>
+            <div className="text-base text-gray-700">
+              <span className="font-semibold">Name:</span>{" "}
+              {profile ? profile[1] : "Not set"}
+            </div>
+            <div className="text-base text-gray-700">
+              <span className="font-semibold">Email:</span>{" "}
+              {profile ? profile[2] : "Not set"}
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <input
               type="text"
               name="name"
@@ -141,7 +153,7 @@ export default function Home() {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              className="w-full p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
             <input
               type="email"
@@ -150,47 +162,65 @@ export default function Home() {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
-              className="w-full p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
             <button
               type="submit"
               disabled={isPending || isConfirming}
-              className={`w-full p-2 text-white rounded ${
-                isPending || isConfirming ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+              className={`w-full p-3 text-white rounded-lg font-semibold transition ${
+                isPending || isConfirming
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
               {isPending ? "Registering..." : isConfirming ? "Confirming..." : "Register DID"}
             </button>
           </form>
-          {message && <p className="mt-4">{message}</p>}
+          {message && (
+            <p
+              className={`mt-4 text-base ${
+                message.includes("Error") ? "text-red-600" : "text-green-600"
+              }`}
+            >
+              {message}
+            </p>
+          )}
         </div>
       )}
-      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md mt-6">
-        <h2 className="text-xl font-bold mb-4">Search by DID</h2>
+
+      <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8 mt-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Search by DID</h2>
         <form onSubmit={handleSearch} className="space-y-4">
           <input
             type="text"
             placeholder="Enter DID (e.g., did:eth:0x...)"
             value={searchDid}
-            //onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             onChange={(e) => setSearchDid(e.target.value)}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
           />
           <button
             type="submit"
-            className="w-full p-2 text-white bg-blue-600 hover:bg-blue-700 rounded"
+            className="w-full p-3 text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition"
           >
             Search
           </button>
         </form>
         {searchResult && (
-          <div className="mt-4">
-            <p>Name: {searchResult.name}</p>
-            <p>Email: {searchResult.email}</p>
-            <p>Owner: {searchResult.owner}</p>
+          <div className="mt-6 space-y-2 text-base text-gray-700">
+            <p>
+              <span className="font-semibold">Name:</span> {searchResult.name}
+            </p>
+            <p>
+              <span className="font-semibold">Email:</span> {searchResult.email}
+            </p>
+            <p className="break-words">
+              <span className="font-semibold">Owner:</span> {searchResult.owner}
+            </p>
           </div>
         )}
-        {message && !searchResult && searchDid && <p className="mt-4">{message}</p>}
+        {message && !searchResult && searchDid && (
+          <p className="mt-4 text-base text-red-600">{message}</p>
+        )}
       </div>
     </div>
   );
