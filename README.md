@@ -167,14 +167,15 @@ const CONTRACT_ADDRESS = "your-deployed-contract-address";
 ```
 did/
 ├── app/
-│   ├── page.js           # Main page with DID registration and search UI
-│   ├── layout.js         # Root layout with Wagmi and RainbowKit providers
-│   └── globals.css       # Global styles (Tailwind CSS)
-├── src/
-│   └── DIDRegistry.sol   # Smart contract for DID management
-├── public/               # Static assets
-├── package.json          # Project dependencies and scripts
-└── README.md             # Project documentation
+│   ├── page.js               # Main page with DID registration and search UI
+│   ├── layout.js             # Root layout with Wagmi and RainbowKit providers
+│   └── globals.css           # Global styles (Tailwind CSS)
+├── contracts/
+│   ├── src/
+│       └── DIDRegistry.sol   # Smart contract for DID management
+├── public/                   # Static assets
+├── package.json              # Project dependencies and scripts
+└── README.md                 # Project documentation
 ```
 
 ## Contributing
